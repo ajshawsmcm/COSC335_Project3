@@ -1,0 +1,25 @@
+00000700:xSimulator: Cannot schedule event for time 00000690.
+00000000:Initialising simulator.
+00000000: Start simulation.
+00000000: Event 000 occurred.
+00000100: Event 001 occurred.
+00000200: Event 002 occurred.
+00000300: Event 003 occurred.
+00000400: Event 004 occurred.
+00000450: Event 040 occurred.
+00000500: Event 005 occurred.
+00000550: Event 050 occurred.
+00000600: Event 006 occurred.
+00000650: Event 060 occurred.
+00000700: Event 007 occurred.
+00000700: Event 100 occurred.
+00000710: Event 101 occurred.
+00000720: Event 102 occurred.
+00000730: Event 103 occurred.
+00000740: Event 104 occurred.
+00000800: Event 008 occurred.
+00000850: Event 080 occurred.
+00000850: Event 070 occurred.
+00000900: Event 009 occurred.
+00000980: Event 095 occurred.
+00000980:Finalising simulator.

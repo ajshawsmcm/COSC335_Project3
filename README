@@ -1,0 +1,101 @@
+This is  a README file to  accompany the scheduler simulation.   It is
+still  incomplete and  there  is material  that  hasn't been  properly
+absorbed.
+
+The scheduler  you are to  write should  go in the  xScheduler.c file.
+That is you will re-implement the  xScheduler module.  You may find it
+necessary to change the contents of the Process Control Block (PCB) in
+xProcess.h, but you should not need and should avoid changing anything
+else.
+
+You will find  descriptions of the functions you need  to implement in
+your  versions of  xScheduler_*.c  in  xScheduler.h.  Initially,  your
+program will  print out a lot  of messages saying that  functions have
+not been  implemented.  You will  likely need  to write all  your code
+before you can run the program at all.
+
+You will find the xList module useful.  This is an implementation of a
+generic linked  list.  Again,  you shouldn't need  to tamper  with the
+insides of  it.  The header file  should give you all  the information
+you need to use  it.  The xSimulator module also makes  use of most of
+its features.
+
+Most of  the code should be  readable to you.  The  following are some
+comments on it to help you along.
+
+The xProcess module encapsulates the process control block (PCB) and a
+few functions  to create new  processes.  This models the  shared data
+structure that the loader and scheduler use to manage processes.
+
+The xSystem module is directly  responsible for testing the scheduler.
+It provides a system-like interface  to your scheduler.  New processes
+are created (simulating the loader)  and terminated.  Processes may be
+scheduled to run, and  an event timer will go off at  the end of their
+quantum allowing you to swap them out for another.  Processes may also
+be sent to the scheduler because they become blocked waiting for input
+or output.  Finally,  the scheduler will be notified  when a processes
+blocking input  or output  is complete  so that it  may be  dealt with
+appropriately.
+
+The xSimulator module is a  generic discrete event simulator.  That is
+it keeps  a time ordered  queue of the events  that will occur  in the
+future.  Events can  be added to the  queue and the next  event can be
+taken  from  the queue.   This  technique  is  very commonly  used  to
+simulate systems  and you will see  it crop up again  in both upcoming
+projects.
+
+IMPLEMENTATION NOTES
+
+Something bad  happens in  a scheduler if  there aren't  any processes
+ready  to  be  run,  so  there  is a  process  that  never  blocks  on
+input/output  and never  terminates  -- the  idle  process.  This  has
+identification number zero.  In our system, this process is created in
+xSystem and  xSystem guarantees  it will never  call any  method other
+than xScheduler_timer_event for this  process.  However, xScheduler is
+instrumented with asserts to ensure that xSystem is well behaved case.
+
+We've  tried to  maintain the  principle  that what's  created in  one
+module is  destroyed in that  module.  This helps with  dynamic memory
+management discipline by providing a  symmettry.  However, this is not
+possible for  the queue in  xScheduler.  Without keeping track  of all
+living  processes  in the  xSystem  too,  the  only  way to  have  the
+processes remaining destroyed when the xScheduler is finalised.
+
+The length of input/output and CPU bursts follows a beta distribution.
+We  aren't even  actually  using a  normal  distribution.  The  normal
+distribution can be achieved using the Polar Method due to Box, Muller
+and Marsaglia.   I have a paper  by Sibuya that gives  the appropriate
+references.  Knuth has code for a beta distribution.
+
+The code *should* keep an account of the amount of the CPU burst using
+in each quantum,  subtracting the quantum from a running  total of the
+time  remaining in  the burst.   Instead  we generate  a fresh  random
+length each  time and determine if  the CPU burst will  end before the
+quantum.   This skews  performance measurements.   So, don't  use this
+code  for  performance  estimations.  Furthermore,  this  distribution
+doesn't vary over the lifetime of the process as is natural.
+
+xSystem does not keep track of  processes in the system to ensure that
+non-existent processes  are not scheduled  and to ensure that  no more
+than a specific limit of processes are scheduled.
+
+Unabsorbed Material
+-------------------
+
+Consider carefully what happens with  events being cancelled.  I think
+only the timer  event *can* get cancelled, but it  may be possible for
+an io_start  event to get  cancelled if it  is before the  timer event
+(transport delay).   This could happen  if the scheduler  pre-empted a
+running  process  when another  finished  it's  i/o.  Cancelling  such
+events should  be easy.  Any io  start before the timer  goes off, but
+what about  it's corresponding  io_end event getting  cancelled.  This
+would  require us  to store  a reference  to the  corresponding io_end
+event in the io_start event.  This gets more and more complex the more
+we consider it.
+
+The idle  process is  dispatched.  You  should check  for this  in the
+scheduler and ignore it unless it is the only ready process. (How will
+you tell?)
+
+xSystem_set_timer must be called  *before* xSystem_dispatch because of
+the way xSystem decides on how the time slice will end.

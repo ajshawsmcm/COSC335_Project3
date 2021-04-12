@@ -1,0 +1,12 @@
+Initialise the process module.
+Create process 0.
+Process 0 has priority 10 in state New.
+Change state of process 0.
+Process 0 has priority 10 in state Running.
+Create process 1.
+Process 1 has priority 5 in state New.
+Change state of process 1.
+Process 1 has priority 5 in state Terminated.
+Destroy process 1.
+Destroy process 0.
+Finalise the process module.

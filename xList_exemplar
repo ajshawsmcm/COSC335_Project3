@@ -1,0 +1,31 @@
+Create a list.
+[00] {}
+
+Try to remove the first element of an empty list.
+[00] {}
+
+Try to remove the last element of an empty list.
+[00] {}
+
+Insert 15 integers.
+[15] {00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14}
+
+Insert an element at the end of the list.
+[16] {00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15}
+
+Insert an element in the middle of a list.
+[17] {00, 01, 02, 03, 04, 50, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15}
+
+Remove an element in the middle of a list.
+[16] {00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15}
+
+Remove the first element from a normal list.
+[15] {01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15}
+
+Try to remove the element after the last one in a normal list.
+[15] {01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15}
+
+Empty the list.
+[00] {}
+
+Done testing.
