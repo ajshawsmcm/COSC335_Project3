@@ -7,10 +7,10 @@
 #define _XPROCESS_H_
 
 typedef enum {
-  xProcess_new, 
-  xProcess_ready, 
-  xProcess_running, 
-  xProcess_waiting, 
+  xProcess_new,
+  xProcess_ready,
+  xProcess_running,
+  xProcess_waiting,
   xProcess_terminated
 } xProcess_state;
 
@@ -24,6 +24,7 @@ typedef struct xProcess_PCB {
   void* page_table;
   /* Additional scheduler data goes here */
   int priority;
+  double expAvg;
 } xProcess_PCB;
 
 void xProcess_initialise(void);

@@ -23,7 +23,7 @@ xProcess_PCB_Ptr xProcess_create(int priority)
    */
   process = malloc(sizeof(xProcess_PCB));
 
-  /* 
+  /*
    * Initialise all fields of the PCB
    */
   process->state = xProcess_new;
@@ -41,7 +41,8 @@ xProcess_PCB_Ptr xProcess_create(int priority)
   process->page_table = NULL;
 
   /* Scheduler specific data initialised here */
-  process->priority = priority;  
+  process->priority = priority;
+  process->expAvg = (double) 1000;
 
   return process;
 }
