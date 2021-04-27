@@ -13,8 +13,8 @@ static xList_Ptr queue[10];
 static xList_Ptr waiting_queue;
 
 static xProcess_PCB_Ptr current;
-dfsdfsdf
-static select_process(void){
+
+static void select_process(void){
   if(xProcess_terminated == current->state){
     xProcess_destroy(current);
   }else if(xProcess_ready == current->state){
@@ -104,17 +104,19 @@ void xScheduler_io_end(xProcess_PCB_Ptr process)
 {
   process->state = xProcess_ready;
   xList_insert(queue[process->priority],NULL,process);
+  xList_Element_Ptr currentNode = (xList_Element_Ptr) xList_first(waiting_queue);
+  xProcess_PCB_Ptr nextData = (xProcess_PCB_Ptr) xList_data(currentNode);
 
-
-  if(xList_first(waiting_queue)->data->number == process->number){
+  if(nextData->number == process->number){
     xList_remove(waiting_queue,NULL);
-    return;
+  }else{
+    nextData = (xProcess_PCB_Ptr) xList_data(xList_next(currentNode));
+    while(nextData->number != process->number){
+      currentNode =  (xList_Element_Ptr) xList_next(currentNode);
+      nextData = (xProcess_PCB_Ptr) xList_data(xList_next(currentNode));
+    }
+    xList_remove(waiting_queue,currentNode);
   }
-  xList_Element_Ptr currentNode = xList_first(waiting_queue);
-  while(xList_next(currentNode)->data->number != process->number){
-    currentNode = xList_next(currentNode);
-  }
-  xList_remove(waiting_queue,currentNode);
   xScheduler_timer_event();
 }
 

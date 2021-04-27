@@ -25,26 +25,28 @@ static void select_process(void){
     xList_insert(ready_queue,xList_last(ready_queue),current);
   }else{
     xList_insert(waiting_queue, xList_last(waiting_queue), current);
-    current->expAvg = (current->expAvg + (double)xSimulator_time() - (double)currentStartTime) / 2.0;
+    current->expAvg = (current->expAvg + (double)xSystem_time() - (double)currentStartTime) / 2.0;
   }
-  currentStartTime = xSimulator_time();
+  currentStartTime = xSystem_time();
   current = (xProcess_PCB_Ptr) xList_data(xList_first(ready_queue));
-  xList_remove(queue, NULL);
+  xList_remove(ready_queue, NULL);
   current->state = xProcess_running;
   xSystem_dispatch(current);
 }
 static void addToReadyQueue(xProcess_PCB_Ptr process){
   process->state = xProcess_ready;
-
-  if(process->expAvg < xList_first(ready_queue)->data->expAvg){
+  xList_Element_Ptr currentNode = (xList_Element_Ptr) xList_first(ready_queue);
+  xProcess_PCB_Ptr nextData = (xProcess_PCB_Ptr) xList_data(currentNode);
+  if(process->expAvg < nextData->expAvg){
     xList_insert(ready_queue,NULL,process);
-    return;
+  }else{
+    nextData = (xProcess_PCB_Ptr) xList_data(xList_next(currentNode));
+    while(xList_next(currentNode) != NULL && process->expAvg > nextData->expAvg){
+      currentNode = (xList_Element_Ptr) xList_next(currentNode);
+      nextData = (xProcess_PCB_Ptr) xList_data(xList_next(currentNode));
+    }
+    xList_insert(ready_queue,currentNode,process);
   }
-  xList_Element_Ptr currentNode = xList_first(ready_queue);
-  while(xList_next(currentNode) != NULL && process->expAvg > xList_next(currentNode)->data->expAvg){
-    currentNode = xList_next(currentNode);
-  }
-  xList_insert(ready_queue,currentNode,process);
 }
 
 void xScheduler_initialise(int raw_quantum){
@@ -103,13 +105,16 @@ void xScheduler_io_end(xProcess_PCB_Ptr process)
 {
   process->state = xProcess_ready;
   addToReadyQueue(process);
-  if(xList_first(waiting_queue)->data->number == process->number){
+  xList_Element_Ptr currentNode = (xList_Element_Ptr) xList_first(waiting_queue);
+  xProcess_PCB_Ptr nextData = (xProcess_PCB_Ptr) xList_data(currentNode);
+  if(nextData->number == process->number){
     xList_remove(waiting_queue,NULL);
     return;
   }
-  xList_Element_Ptr currentNode = xList_first(waiting_queue);
-  while(xList_next(currentNode)->data->number != process->number){
-    currentNode = xList_next(currentNode);
+  nextData = (xProcess_PCB_Ptr) xList_data(xList_next(currentNode));
+  while(nextData->number != process->number){
+    currentNode = (xList_Element_Ptr) xList_next(currentNode);
+    nextData = (xProcess_PCB_Ptr) xList_data(xList_next(currentNode));
   }
   xList_remove(waiting_queue,currentNode);
 }
