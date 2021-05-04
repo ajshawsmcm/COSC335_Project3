@@ -23,12 +23,12 @@ static char buffer[BUFFER_SIZE];
 #define PRIORITY_MAXIMUM 10
 
 /* A enumeration of possible events */
-typedef enum { 
-   xSystem_process_start, 
-   xSystem_process_end, 
-   xSystem_timer_event, 
+typedef enum {
+   xSystem_process_start,
+   xSystem_process_end,
+   xSystem_timer_event,
    xSystem_io_start,
-   xSystem_io_end 
+   xSystem_io_end
  } xSystem_type;
 
 typedef struct xSystem_Event* xSystem_Event_Ptr;
@@ -116,8 +116,8 @@ static void create_burst(xProcess_PCB_Ptr process)
 
   /* Determine the length of the CPU burst */
   burst_length = gaussian_random(CPU_BURST_MEDIAN, CPU_BURST_SIGMA);
-  
-  /* 
+
+  /*
    * Determine the manner in which the quantum will end.  The idle
    * process always runs to the end of its quantum
    */
@@ -125,7 +125,7 @@ static void create_burst(xProcess_PCB_Ptr process)
   if (0 == process->number) {
     /* Just let the timer event stand */
   } else {
-  
+
     if (xSimulator_time() + burst_length > timer_time ) { /* CPU Burst */
       /* Determine if the process will end on this CPU burst */
       if (0 == (rand() % END_PROCESS_PROBABILITY)) {
@@ -137,14 +137,14 @@ static void create_burst(xProcess_PCB_Ptr process)
 	/* Just allow the timer to handle everything */
       }
     } else { /* The slice ends with blocking I/O */
-      
+
       io_start_time = xSimulator_time() + burst_length;
       io_service_time = gaussian_random(IO_BURST_MEDIAN, IO_BURST_SIGMA);
       io_end_time = io_start_time + io_service_time;
 
       io_start_event = schedule_event(io_start_time, xSystem_io_start, process);
       io_end_event = schedule_event(io_end_time, xSystem_io_end, process);
-      
+
     }
   }
 }
@@ -155,7 +155,7 @@ static void create_process(void)
   time_t time;
 
   process = xProcess_create(rand() % (PRIORITY_MAXIMUM + 1));
-  time = xSimulator_time() + 
+  time = xSimulator_time() +
     gaussian_random(CPU_BURST_MEDIAN, CPU_BURST_SIGMA);
 
   schedule_event(time, xSystem_process_start, process);
@@ -185,7 +185,7 @@ void xSystem_finalise(void)
 void xSystem_process(void* raw)
 {
   /* NOTE: Not being able to do an implicit cast through the parameter
-   * type is annoying 
+   * type is annoying
    */
 
   xSystem_Event_Ptr event;
@@ -274,7 +274,7 @@ void xSystem_dispatch(xProcess_PCB_Ptr process)
   print(process, "Dispatched.");
 
   create_burst(process);
-    
+
   /* Determine if a new process should be created */
   if (0 == rand() % NEW_PROCESS_PROBABILITY) {
     create_process();

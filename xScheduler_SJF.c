@@ -23,24 +23,26 @@ static void select_process(void){
   //printf("%s\n",xProcess_state_name(current->state));
   if(xProcess_terminated == current->state){
     xProcess_destroy(current);
-  }else if(xProcess_ready == current->state){//only expect this once
+  }else if(0 == current->number){
     current->expAvg = 99999;
-    //printf("%s\n",xProcess_state_name(current->state));
     addToReadyQueue(current);
+  }else if(xProcess_ready == current->state){
+    current->state = xProcess_running;
+    xSystem_set_timer(xSystem_time()+2000);
+    xSystem_dispatch(current);
+    return;
   }else{
     xList_insert(waiting_queue, xList_last(waiting_queue), current);
     current->expAvg = (current->expAvg + (double)xSystem_time() - (double)currentStartTime) / 2.0;
   }
-  //printf("%s\n",xProcess_state_name(current->state));
   currentStartTime = xSystem_time();
   current = (xProcess_PCB_Ptr) xList_data(xList_first(ready_queue));
   xList_remove(ready_queue, NULL);
   current->state = xProcess_running;
-  xSystem_set_timer(xSystem_time()+1500);
+  xSystem_set_timer(xSystem_time()+2000);
   xSystem_dispatch(current);
 }
 static void addToReadyQueue(xProcess_PCB_Ptr process){
-  //printf("hey\n");
   process->state = xProcess_ready;
   if(0 == xList_size(ready_queue)){
     xList_insert(ready_queue,NULL,process);
@@ -86,6 +88,7 @@ void xScheduler_finalise(void)
     current = (xProcess_PCB_Ptr) xList_data(xList_first(ready_queue));
     xList_remove(ready_queue, NULL);
     current->state = xProcess_terminated;
+    //printf("Process %d Exponentional Average: %lf\n",current->number,current->expAvg);
     xProcess_destroy(current);
   }
   xList_destroy(ready_queue);
@@ -94,6 +97,7 @@ void xScheduler_finalise(void)
     current = (xProcess_PCB_Ptr) xList_data(xList_first(waiting_queue));
     xList_remove(waiting_queue, NULL);
     current->state = xProcess_terminated;
+    //printf("Process %d Exponentional Average: %lf\n",current->number,current->expAvg);
     xProcess_destroy(current);
   }
   xList_destroy(waiting_queue);
@@ -104,6 +108,8 @@ void xScheduler_process_start(xProcess_PCB_Ptr process)
   char buffer[1000];
   snprintf(buffer, 1000, "Setting Process %d to Ready", process->number);
   xSystem_kernel_message(buffer);
+  process->state = xProcess_ready;
+  process->expAvg = 1000;
   addToReadyQueue(process);
 }
 

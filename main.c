@@ -14,7 +14,7 @@ int main() {
   end_time = 100000;
   xSimulator_initialise(xSystem_process, xSystem_free);
   xSystem_initialise();
-  
+
   xSimulator_run(end_time);
 
   xSystem_finalise();
