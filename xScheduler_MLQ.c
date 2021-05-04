@@ -15,8 +15,9 @@ static xList_Ptr waiting_queue;
 static xProcess_PCB_Ptr current;
 
 static void select_process(void){
-  printf(xProcess_state_name(current->state));
-  switch(current->state){//Put the current process somewhere
+  //printf("%s\n",xProcess_state_name(current->state));
+  //Put the current process somewhere
+  switch(current->state){
     case xProcess_terminated:
     xProcess_destroy(current);
     break;
@@ -26,19 +27,20 @@ static void select_process(void){
     default:
     xList_insert(waiting_queue,xList_last(waiting_queue),current);
   }
+  //printf("%s\n",xProcess_state_name(current->state));
   //Find next ready process according to the MLQ line of succession
   int i;
-  for(i = 9; i > -1; i++){
+  for(i = 9; i > -1; i--){
+    //printf("%d\n",i);
     if(xList_size(queue[i])){
         current = (xProcess_PCB_Ptr) xList_data(xList_first(queue[i]));
         xList_remove(queue[i], NULL);
         break;
     }
   }
+  //printf("%s\n",xProcess_state_name(current->state));
   current->state = xProcess_running;
-  if(0 == current->number){
-    xSystem_set_timer(xSystem_time() + 1000);
-  }
+  xSystem_set_timer(xSystem_time() + 1500);
   xSystem_dispatch(current);
 }
 
@@ -51,6 +53,7 @@ void xScheduler_initialise(int raw_quantum)
   waiting_queue = xList_create();
   current = xProcess_create(0);
   current->state = xProcess_running;
+
 }
 
 void xScheduler_finalise(void)
@@ -66,14 +69,15 @@ void xScheduler_finalise(void)
       xProcess_destroy(current);
     }
     xList_destroy(queue[i]);
-    while (NULL != xList_first(waiting_queue)) {
-      current = (xProcess_PCB_Ptr) xList_data(xList_first(waiting_queue));
-      xList_remove(waiting_queue, NULL);
-      current->state = xProcess_terminated;
-      xProcess_destroy(current);
-    }
-    xList_destroy(waiting_queue);
   }
+  while (NULL != xList_first(waiting_queue)) {
+    current = (xProcess_PCB_Ptr) xList_data(xList_first(waiting_queue));
+    xList_remove(waiting_queue, NULL);
+    current->state = xProcess_terminated;
+    xProcess_destroy(current);
+  }
+  xList_destroy(waiting_queue);
+
 }
 
 void xScheduler_process_start(xProcess_PCB_Ptr process)
@@ -86,6 +90,7 @@ void xScheduler_process_start(xProcess_PCB_Ptr process)
   xList_insert(queue[process->priority],NULL,process);
 
   if(process->priority > current->priority){
+
     xScheduler_timer_event();
   }
 }
