@@ -17,16 +17,19 @@ static xProcess_PCB_Ptr current;
 
 static int currentStartTime;
 
+static void addToReadyQueue(xProcess_PCB_Ptr process);
+
 static void select_process(void){
   if(xProcess_terminated == current->state){
     xProcess_destroy(current);
   }else if(xProcess_ready == current->state){//only expect this once
-    current->expAvg = 10000;
-    xList_insert(ready_queue,xList_last(ready_queue),current);
+    current->expAvg = 99999;
+    addToReadyQueue(current);
   }else{
     xList_insert(waiting_queue, xList_last(waiting_queue), current);
     current->expAvg = (current->expAvg + (double)xSystem_time() - (double)currentStartTime) / 2.0;
   }
+  printf("Hey\n");
   currentStartTime = xSystem_time();
   current = (xProcess_PCB_Ptr) xList_data(xList_first(ready_queue));
   xList_remove(ready_queue, NULL);
@@ -85,6 +88,10 @@ void xScheduler_process_start(xProcess_PCB_Ptr process)
   snprintf(buffer, 1000, "Setting Process %d to Ready", process->number);
   xSystem_kernel_message(buffer);
   addToReadyQueue(process);
+  if(0 == current->number){
+    printf("hi");
+    select_process();
+  }
 }
 
 void xScheduler_process_end(void)
@@ -118,9 +125,10 @@ void xScheduler_io_end(xProcess_PCB_Ptr process)
   }
   xList_remove(waiting_queue,currentNode);
 }
-//I don't think I'll require this method, no? If it runs, the code won't work.
+
 void xScheduler_timer_event(void)
 {
+
   current->state = xProcess_ready;
   select_process();
 }
